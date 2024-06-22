@@ -34,8 +34,8 @@ namespace Bashgeon
             // ===================================================================================================================================
             while (!difficultyIsChosen)
             {
-                RenderMainMenu(ref difficultyOptions, ref currentOptionIndex);
-                ReadDifficultyMenuInput(ref currentOptionIndex, ref playerHealth, ref playerMana, ref movesCount, ref difficultyIsChosen);
+                RenderMainMenu(difficultyOptions, ref currentOptionIndex);
+                HandleDifficultyInput(ref currentOptionIndex, ref playerHealth, ref playerMana, ref movesCount, ref difficultyIsChosen);
                 Console.Clear();
             }
             mainMenuAmbience.Stop();
@@ -50,13 +50,13 @@ namespace Bashgeon
             Random rand = new Random();
             bool playerSpawned = false;
             // Генерация карты
-            for (int i = 0; i < map.GetLength(0); i++)
+            for (int y = 0; y < map.GetLength(0); y++)
             {
-                for (int j = 0; j < map.GetLength(1); j++)
+                for (int x = 0; x < map.GetLength(1); x++)
                 {
-                    if (i == 0 || i == map.GetLength(0) - 1 || j == 0 || j == map.GetLength(1) - 1)
+                    if (y == 0 || y == map.GetLength(0) - 1 || x == 0 || x == map.GetLength(1) - 1)
                     {
-                        map[i, j] = '#';
+                        map[y, x] = '#';
                     }
                     else
                     {
@@ -65,7 +65,7 @@ namespace Bashgeon
                             case 0:
                             case 1:
                             case 14:
-                                map[i, j] = '#';
+                                map[y, x] = '#';
                                 break;
                             case 2:
                             case 3:
@@ -79,16 +79,16 @@ namespace Bashgeon
                             case 13:
                                 if (!playerSpawned)
                                 {
-                                    playerPosition[0] = i;
-                                    playerPosition[1] = j;
+                                    playerPosition[0] = y;
+                                    playerPosition[1] = x;
                                 }
-                                map[i, j] = ' ';
+                                map[y, x] = ' ';
                                 break;
                             case 7:
-                                map[i, j] = '!';
+                                map[y, x] = '!';
                                 break;
                             case 8:
-                                map[i, j] = 'X';
+                                map[y, x] = 'X';
                                 break;
                             default:
                                 break;
@@ -122,12 +122,12 @@ namespace Bashgeon
 
                 };
 
-                RenderMap(ref map, playerPosition, isAlive);
+                RenderMap(map, playerPosition, isAlive);
                 DrawHealthBar(playerHealth, maxHP);
                 DrawManaBar(playerMana, maxMP);
                 RenderUI(movesCount, treasuresFound, treasuresCount, enemiesEliminated, playerPosition, bag);
 
-                ReadPlayerInput(footstepSound, wallDestroySound, isAlive, ref movesCount, ref playerPosition, ref playerMana, ref map);
+                HandlePlayerInput(footstepSound, wallDestroySound, isAlive, ref movesCount, playerPosition, ref playerMana, map);
                 if (map[playerPosition[0], playerPosition[1]] == 'X')
                 {
                     treasuresFound++;
@@ -155,7 +155,7 @@ namespace Bashgeon
         }
 
 
-        static void RenderMainMenu(ref string[] difficultyOptions, ref int currentOptionIndex)
+        static void RenderMainMenu(string[] difficultyOptions, ref int currentOptionIndex)
         {
             // Отрисовка главного меню с выбором сложности
             Console.WriteLine(@"
@@ -187,34 +187,34 @@ namespace Bashgeon
             }
         }
 
-        static void RenderMap(ref char[,] map, int[] playerPosition, bool isAlive)
+        static void RenderMap(char[,] map, int[] playerPosition, bool isAlive)
         {
             // Отрисовка игрового поля
-            for (int i = 0; i < map.GetLength(0); i++)
+            for (int y = 0; y < map.GetLength(0); y++)
             {
-                Console.SetCursorPosition(40, i);
-                for (int j = 0; j < map.GetLength(1); j++)
+                Console.SetCursorPosition(40, y);
+                for (int x = 0; x < map.GetLength(1); x++)
                 {
-                    if (i == playerPosition[0] && j == playerPosition[1])
+                    if (y == playerPosition[0] && x == playerPosition[1])
                     {
                         Console.ForegroundColor = ConsoleColor.White;
                         if (isAlive) Console.ForegroundColor = ConsoleColor.DarkBlue;
                         Console.Write("* ");
                     }
-                    else if (map[i, j] == 'X')
+                    else if (map[y, x] == 'X')
                     {
                         Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(map[i, j] + " ");
+                        Console.Write(map[y, x] + " ");
                     }
-                    else if (map[i, j] == '!')
+                    else if (map[y, x] == '!')
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
-                        Console.Write(map[i, j] + " ");
+                        Console.Write(map[y, x] + " ");
                     }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.Write(map[i, j] + " ");
+                        Console.Write(map[y, x] + " ");
                     }
                 }
                 Console.WriteLine();
@@ -222,11 +222,11 @@ namespace Bashgeon
         }
 
         static void RenderUI(
-            int movesCount, 
-            int treasuresFound, 
-            int treasuresCount, 
-            int enemiesEliminated, 
-            int[] playerPosition, 
+            int movesCount,
+            int treasuresFound,
+            int treasuresCount,
+            int enemiesEliminated,
+            int[] playerPosition,
             char[] bag)
         {
             Console.SetCursorPosition(0, 15);
@@ -299,11 +299,11 @@ namespace Bashgeon
             Console.Write("]");
         }
 
-        static void ReadDifficultyMenuInput(
-            ref int currentOptionIndex, 
-            ref int playerHealth, 
-            ref int playerMana, 
-            ref int movesCount, 
+        static void HandleDifficultyInput(
+            ref int currentOptionIndex,
+            ref int playerHealth,
+            ref int playerMana,
+            ref int movesCount,
             ref bool difficultyIsChosen)
         {
             // регистрируем нажатие на клавишу и далее имитируем сдвиг указателя на сложность
@@ -355,14 +355,14 @@ namespace Bashgeon
             }
         }
 
-        static void ReadPlayerInput(
-            SoundPlayer footstepSound, 
-            SoundPlayer wallDestroySound, 
-            bool isAlive, 
-            ref int movesCount, 
-            ref int[] playerPosition, 
-            ref int playerMana, 
-            ref char[,] map)
+        static void HandlePlayerInput(
+            SoundPlayer footstepSound,
+            SoundPlayer explosionSound,
+            bool isAlive,
+            ref int movesCount,
+            int[] playerPosition,
+            ref int playerMana,
+            char[,] map)
         {
             /*
              Регистрируем нажитие на клавишу.
@@ -372,65 +372,60 @@ namespace Bashgeon
             Если была нажата клавиша разрушения стен, то проверяем на достаточность маны,
             и при наличии стен в 4 сторонах от пользователя, меняем символ стены на пробел в двумерном массиве символов map и отрисовываем корту снова
              */
-            ConsoleKeyInfo keyPressed = Console.ReadKey(true);
-            switch (keyPressed.Key)
+            ConsoleKeyInfo pressedKey = Console.ReadKey(true);
+
+            int[] direction = GetDirection(pressedKey);
+            int playerNextY = playerPosition[0] + direction[0];
+            int playerNextX = playerPosition[1] + direction[1];
+
+            char nextCell = map[playerNextY, playerNextX];
+
+            if (nextCell != '#' && isAlive && movesCount > 0)
             {
-                case ConsoleKey.UpArrow:
-                    if (map[playerPosition[0] - 1, playerPosition[1]] != '#' && isAlive && movesCount > 0)
-                    {
-                        footstepSound.Play();
-                        movesCount--;
-                        playerPosition[0]--;
-                    }
-                    break;
-                case ConsoleKey.LeftArrow:
-                    if (map[playerPosition[0], playerPosition[1] - 1] != '#' && isAlive && movesCount > 0)
-                    {
-                        footstepSound.Play();
-                        movesCount--;
-                        playerPosition[1]--;
-                    }
-                    break;
-                case ConsoleKey.DownArrow:
-                    if (map[playerPosition[0] + 1, playerPosition[1]] != '#' && isAlive && movesCount > 0)
-                    {
-                        footstepSound.Play();
-                        movesCount--;
-                        playerPosition[0]++;
-                    }
-                    break;
-                case ConsoleKey.RightArrow:
-                    if (map[playerPosition[0], playerPosition[1] + 1] != '#' && isAlive && movesCount > 0)
-                    {
-                        footstepSound.Play();
-                        movesCount--;
-                        playerPosition[1]++;
-                    }
-                    break;
-                case ConsoleKey.E:
-                    if (playerMana <= 0) break;
-                    playerMana -= 10;
-                    wallDestroySound.Play();
-                    if (map[playerPosition[0] - 1, playerPosition[1]] != 'X' && map[playerPosition[0] - 1, playerPosition[1]] != '!' && playerPosition[0] - 1 != 0)
-                    {
-                        map[playerPosition[0] - 1, playerPosition[1]] = ' ';
-                    }
-                    if (map[playerPosition[0] + 1, playerPosition[1]] != 'X' && map[playerPosition[0] + 1, playerPosition[1]] != '!' && playerPosition[0] + 1 != map.GetLength(0) - 1)
-                    {
-                        map[playerPosition[0] + 1, playerPosition[1]] = ' ';
-                    }
-                    if (map[playerPosition[0], playerPosition[1] - 1] != 'X' && map[playerPosition[0], playerPosition[1] - 1] != '!' && playerPosition[1] - 1 != 0)
-                    {
-                        map[playerPosition[0], playerPosition[1] - 1] = ' ';
-                    }
-                    if (map[playerPosition[0], playerPosition[1] + 1] != 'X' && map[playerPosition[0], playerPosition[1] + 1] != '!' && playerPosition[1] + 1 != map.GetLength(1) - 1)
-                    {
-                        map[playerPosition[0], playerPosition[1] + 1] = ' ';
-                    }
-                    break;
-                default:
-                    break;
+                playerPosition[0] = playerNextY;
+                playerPosition[1] = playerNextX;
+                footstepSound.Play();
+                movesCount--;
             }
+
+            if (pressedKey.Key == ConsoleKey.E && playerMana > 0)
+            {
+                playerMana -= 10;
+                explosionSound.Play();
+                DestroyWalls(map, playerPosition);
+            }
+        }
+
+        static void DestroyWalls(char[,] map, int[] playerPosition)
+        {
+            if (map[playerPosition[0] - 1, playerPosition[1]] == '#' && playerPosition[0] - 1 != 0)
+            {
+                map[playerPosition[0] - 1, playerPosition[1]] = ' ';
+            }
+            if (map[playerPosition[0] + 1, playerPosition[1]] == '#' && playerPosition[0] + 1 != map.GetLength(0) - 1)
+            {
+                map[playerPosition[0] + 1, playerPosition[1]] = ' ';
+            }
+            if (map[playerPosition[0], playerPosition[1] - 1] == '#' && playerPosition[1] - 1 != 0)
+            {
+                map[playerPosition[0], playerPosition[1] - 1] = ' ';
+            }
+            if (map[playerPosition[0], playerPosition[1] + 1] == '#' && playerPosition[1] + 1 != map.GetLength(1) - 1)
+            {
+                map[playerPosition[0], playerPosition[1] + 1] = ' ';
+            }
+        }
+
+        static int[] GetDirection(ConsoleKeyInfo pressedKey)
+        {
+            int[] direction = { 0, 0 };
+
+            if (pressedKey.Key == ConsoleKey.UpArrow) direction[0] = -1;
+            else if (pressedKey.Key == ConsoleKey.DownArrow) direction[0] = 1;
+            else if (pressedKey.Key == ConsoleKey.LeftArrow) direction[1] = -1;
+            else if (pressedKey.Key == ConsoleKey.RightArrow) direction[1] = 1;
+
+            return direction;
         }
     }
 }
