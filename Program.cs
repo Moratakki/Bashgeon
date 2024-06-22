@@ -10,7 +10,6 @@ namespace Bashgeon
     {
         static void Main(string[] args)
         {
-            Console.WriteLine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             Console.SetWindowSize(120, 30);
             Console.Title = "Bashgeon";
             // Устанавливаем кодировку Unicode, чтобы все символы отображались, как нужно
@@ -114,7 +113,7 @@ namespace Bashgeon
             bool isAlive = true;
             char[] bag = new char[1];
             Console.Clear();
-            Console.SetWindowSize(116, 26);
+            Console.SetWindowSize(118, 26);
             while (true)
             {
                 if (playerHealth <= 0)
