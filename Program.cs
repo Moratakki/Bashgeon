@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Media;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Bashgeon
 {
@@ -26,7 +28,7 @@ namespace Bashgeon
             string[] difficultyOptions = { "Easy", "Medium", "Hard" };
             int currentOptionIndex = 0;
             bool difficultyIsChosen = false;
-            int playerHealth = 0, playerMana = 0, movesCount = 0;
+            int playerHealth = 0, playerMana = 0, movesCount = 0, killPoints = 0, treasurePickUpPoints = 0, score = 0;
             mainMenuAmbience.Play();
 
             // ===================================================================================================================================
@@ -35,7 +37,7 @@ namespace Bashgeon
             while (!difficultyIsChosen)
             {
                 RenderMainMenu(difficultyOptions, ref currentOptionIndex);
-                HandleDifficultyInput(ref currentOptionIndex, ref playerHealth, ref playerMana, ref movesCount, ref difficultyIsChosen);
+                HandleDifficultyInput(ref currentOptionIndex, ref playerHealth, ref playerMana, ref movesCount, ref difficultyIsChosen, ref killPoints, ref treasurePickUpPoints);
                 Console.Clear();
             }
             mainMenuAmbience.Stop();
@@ -54,10 +56,7 @@ namespace Bashgeon
             {
                 for (int x = 0; x < map.GetLength(1); x++)
                 {
-                    if (y == 0 || y == map.GetLength(0) - 1 || x == 0 || x == map.GetLength(1) - 1)
-                    {
-                        map[y, x] = '#';
-                    }
+                    if (y == 0 || y == map.GetLength(0) - 1 || x == 0 || x == map.GetLength(1) - 1) map[y, x] = '#';
                     else
                     {
                         switch (rand.Next(0, 15))
@@ -100,55 +99,43 @@ namespace Bashgeon
 
             int treasuresCount = 0;
             for (int i = 0; i < map.GetLength(0); i++)
-            {
                 for (int j = 0; j < map.GetLength(1); j++)
-                {
                     if (map[i, j] == 'X') treasuresCount++;
-                }
-            }
 
             int maxHP = playerHealth;
             int maxMP = playerMana;
             int enemiesEliminated = 0, treasuresFound = 0;
+            char currentCell;
             bool isAlive = true;
-            char[] bag = new char[1];
-            Console.Clear();
-            Console.SetWindowSize(118, 26);
+
             while (true)
             {
-                if (playerHealth <= 0)
-                {
-                    isAlive = false;
-
-                };
+                if (playerHealth <= 0) isAlive = false;
 
                 RenderMap(map, playerPosition, isAlive);
                 DrawHealthBar(playerHealth, maxHP);
                 DrawManaBar(playerMana, maxMP);
-                RenderUI(movesCount, treasuresFound, treasuresCount, enemiesEliminated, playerPosition, bag);
-
+                RenderUI(movesCount, treasuresFound, treasuresCount, enemiesEliminated, playerPosition, ref score);
                 HandlePlayerInput(footstepSound, wallDestroySound, isAlive, ref movesCount, playerPosition, ref playerMana, map);
-                if (map[playerPosition[0], playerPosition[1]] == 'X')
-                {
-                    treasuresFound++;
-                    pickUpTreasure.Play();
-                    movesCount += 4;
-                    map[playerPosition[0], playerPosition[1]] = ' ';
-                    char[] tempBag = new char[bag.Length + 1];
-                    for (int i = 0; i < bag.Length; i++)
-                    {
-                        tempBag[i] = 'X';
-                    }
-                    bag = tempBag;
 
-                }
-                else if (map[playerPosition[0], playerPosition[1]] == '!')
+
+                currentCell = map[playerPosition[0], playerPosition[1]];
+                if (currentCell == 'X')
                 {
-                    enemyHitSound.Play();
                     map[playerPosition[0], playerPosition[1]] = ' ';
+                    treasuresFound++;
+                    score += treasurePickUpPoints;
+                    movesCount += 4;
+                    pickUpTreasure.Play();
+                }
+                else if (currentCell == '!')
+                {
+                    map[playerPosition[0], playerPosition[1]] = ' ';
+                    enemiesEliminated++;
+                    score += killPoints;
                     playerHealth -= 10;
                     movesCount += 2;
-                    enemiesEliminated++;
+                    enemyHitSound.Play();
                 }
                 Console.Clear();
             }
@@ -226,8 +213,7 @@ namespace Bashgeon
             int treasuresFound,
             int treasuresCount,
             int enemiesEliminated,
-            int[] playerPosition,
-            char[] bag)
+            int[] playerPosition, ref int score)
         {
             Console.SetCursorPosition(0, 15);
             Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -244,11 +230,7 @@ namespace Bashgeon
             {
                 Console.WriteLine($"Сокровищ найдено: {treasuresFound}");
             }
-            Console.Write("Содержимое сумки: ");
-            for (int i = 0; i < bag.Length; i++)
-            {
-                Console.Write(bag[i] + " ");
-            }
+            Console.WriteLine($"Очки: {score}");
             Console.WriteLine($"\nВрагов побеждено: {enemiesEliminated}");
             Console.SetCursorPosition(47, 25);
             Console.WriteLine($"Ваши координаты: X: {playerPosition[1]}; Y: {playerPosition[0]}");
@@ -304,7 +286,7 @@ namespace Bashgeon
             ref int playerHealth,
             ref int playerMana,
             ref int movesCount,
-            ref bool difficultyIsChosen)
+            ref bool difficultyIsChosen, ref int killPoints, ref int treasurePickUpPoints)
         {
             // регистрируем нажатие на клавишу и далее имитируем сдвиг указателя на сложность
             ConsoleKey difficultyChangeKey = Console.ReadKey().Key;
@@ -332,6 +314,8 @@ namespace Bashgeon
                         playerHealth = 150;
                         playerMana = 100;
                         movesCount = 20;
+                        killPoints = 45;
+                        treasurePickUpPoints = 125;
 
                     }
                     else if (currentOptionIndex == 1)
@@ -339,6 +323,8 @@ namespace Bashgeon
                         playerHealth = 100;
                         playerMana = 60;
                         movesCount = 15;
+                        killPoints = 60;
+                        treasurePickUpPoints = 150;
 
                     }
                     else
@@ -346,6 +332,8 @@ namespace Bashgeon
                         playerHealth = 70;
                         playerMana = 40;
                         movesCount = 10;
+                        killPoints = 80;
+                        treasurePickUpPoints = 180;
 
                     }
                     difficultyIsChosen = true;
@@ -380,7 +368,7 @@ namespace Bashgeon
 
             char nextCell = map[playerNextY, playerNextX];
 
-            if (nextCell != '#' && isAlive && movesCount > 0)
+            if (direction[0] + direction[1] != 0 && nextCell != '#' && isAlive && movesCount > 0)
             {
                 playerPosition[0] = playerNextY;
                 playerPosition[1] = playerNextX;
@@ -425,7 +413,7 @@ namespace Bashgeon
             else if (pressedKey.Key == ConsoleKey.LeftArrow) direction[1] = -1;
             else if (pressedKey.Key == ConsoleKey.RightArrow) direction[1] = 1;
 
-            return direction;
+                return direction;
         }
     }
 }
