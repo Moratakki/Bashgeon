@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Text;
 using System.Media;
+using System.IO;
+using System.Reflection;
 
 namespace Bashgeon
 {
@@ -8,6 +10,7 @@ namespace Bashgeon
     {
         static void Main(string[] args)
         {
+            Console.WriteLine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
             Console.SetWindowSize(120, 30);
             Console.Title = "Bashgeon";
             // Устанавливаем кодировку Unicode, чтобы все символы отображались, как нужно
