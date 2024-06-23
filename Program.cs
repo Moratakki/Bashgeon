@@ -115,17 +115,15 @@ namespace Bashgeon
             playerInfo["playerMaxHealth"] = playerInfo["playerHealth"];
             playerInfo["playerMaxMana"] = playerInfo["playerMana"];
             char currentCell;
-            bool isAlive = true;
-            // ==================================ВЫШЕ ВСЁ ХОРОШО==================================
+
             while (true)
             {
-                if (playerInfo["playerHealth"] <= 0) isAlive = false;
 
-                RenderMap(map, playerInfo, isAlive);
+                RenderMap(map, playerInfo);
                 DrawHealthBar(playerInfo["playerHealth"], playerInfo["playerMaxHealth"]);
                 DrawManaBar(playerInfo["playerMana"], playerInfo["playerMaxMana"]);
                 RenderUI(playerInfo, treasuresCount);
-                HandlePlayerInput(footstepSound, wallDestroySound, isAlive, map, playerInfo);
+                HandlePlayerInput(footstepSound, wallDestroySound, map, playerInfo);
 
 
                 currentCell = map[playerInfo["playerY"], playerInfo["playerX"]];
@@ -183,7 +181,7 @@ namespace Bashgeon
             }
         }
 
-        static void RenderMap(char[,] map, Dictionary<string, int> playerInfo, bool isAlive)
+        static void RenderMap(char[,] map, Dictionary<string, int> playerInfo)
         {
             // Отрисовка игрового поля
             for (int y = 0; y < map.GetLength(0); y++)
@@ -194,7 +192,7 @@ namespace Bashgeon
                     if (y == playerInfo["playerY"] && x == playerInfo["playerX"])
                     {
                         Console.ForegroundColor = ConsoleColor.White;
-                        if (isAlive) Console.ForegroundColor = ConsoleColor.DarkBlue;
+                        if (playerInfo["playerHealth"] > 0) Console.ForegroundColor = ConsoleColor.DarkBlue;
                         Console.Write("* ");
                     }
                     else if (map[y, x] == 'X')
@@ -346,7 +344,7 @@ namespace Bashgeon
             }
         }
 
-        static void HandlePlayerInput(SoundPlayer footstepSound, SoundPlayer explosionSound, bool isAlive, char[,] map, Dictionary<string, int> playerInfo)
+        static void HandlePlayerInput(SoundPlayer footstepSound, SoundPlayer explosionSound, char[,] map, Dictionary<string, int> playerInfo)
         {
             /*
              Регистрируем нажитие на клавишу.
@@ -364,7 +362,7 @@ namespace Bashgeon
 
             char nextCell = map[playerNextY, playerNextX];
 
-            if (direction[0] + direction[1] != 0 && nextCell != '#' && isAlive && playerInfo["movesLeft"] > 0)
+            if (direction[0] + direction[1] != 0 && nextCell != '#' && playerInfo["playerHealth"] > 0 && playerInfo["movesLeft"] > 0)
             {
                 playerInfo["playerY"] = playerNextY;
                 playerInfo["playerX"] = playerNextX;
