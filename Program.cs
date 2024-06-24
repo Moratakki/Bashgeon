@@ -78,52 +78,56 @@ namespace Bashgeon
                     {
                         if (y == 0 || y == map.GetLength(0) - 1 || x == 0 || x == map.GetLength(1) - 1) // стены по краям карты
                         {
-                            map[y, x] = '#'; 
-                            continue;
+                            map[y, x] = '#';
                         }
-                        switch (rand.Next(0, 15))
+                        else
                         {
-                            case 0:
-                            case 1:
-                            case 14:
-                                if (isFirstCycle)
-                                    map[y, x] = '#';
-                                break;
-                            case 2:
-                            case 3:
-                            case 4:
-                            case 5:
-                            case 6:
-                            case 9:
-                            case 10:
-                            case 11:
-                            case 12:
-                            case 13:
-                                if (!isPlayerSpawned)
-                                {
-                                    playerInfo["playerY"] = y;
-                                    playerInfo["playerX"] = x;
-                                    isPlayerSpawned = true;
-
-                                }
-                                if (isFirstCycle) map[y, x] = ' ';
-                                break;
-                            case 7:
-                                if (!isFirstCycle && enemiesSpawned < mapAttributes["enemiesCount"] && map[y, x] == ' ')
-                                {
-                                    enemiesSpawned++;
-                                    map[y, x] = '!';
-                                }
-                                break;
-                            case 8:
-                                if (!isFirstCycle && treasuresSpawned < mapAttributes["treasuresCount"] && map[y, x] == ' ')
-                                {
-                                    treasuresSpawned++;
-                                    map[y, x] = 'X';
-                                }
-                                break;
-                            default:
-                                break;
+                            switch (rand.Next(0, 15))
+                            {
+                                case 0:
+                                case 1:
+                                case 2:
+                                    if (isFirstCycle)
+                                        map[y, x] = '#';
+                                    break;
+                                case 3:
+                                case 4:
+                                case 5:
+                                case 6:
+                                case 7:
+                                case 8:
+                                case 9:
+                                case 10:
+                                case 11:
+                                case 12:
+                                    if (!isPlayerSpawned)
+                                    {
+                                        playerInfo["playerY"] = y;
+                                        playerInfo["playerX"] = x;
+                                        isPlayerSpawned = true;
+                                            
+                                    }
+                                    if (isFirstCycle) map[y, x] = ' ';
+                                    break;
+                                case 13:
+                                    if (!isFirstCycle && enemiesSpawned < mapAttributes["enemiesCount"] && map[y, x] == ' ')
+                                    {
+                                        enemiesSpawned++;
+                                        map[y, x] = '!';
+                                    }
+                                    else if(isFirstCycle)map[y, x] = ' ';
+                                    break;
+                                case 14:
+                                    if (!isFirstCycle && treasuresSpawned < mapAttributes["treasuresCount"] && map[y, x] == ' ')
+                                    {
+                                        treasuresSpawned++;
+                                        map[y, x] = 'X';
+                                    }
+                                    else if (isFirstCycle) map[y, x] = ' ';
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
                 }
@@ -245,7 +249,7 @@ namespace Bashgeon
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.Write(map[y, x] + "      ");
+                        Console.Write(map[y, x] + " ");
                     }
                 }
                 Console.WriteLine();
