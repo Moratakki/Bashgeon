@@ -193,10 +193,9 @@ namespace Bashgeon
                         playerInfo["playerY"] = 3;
                     }
                 }
-
+                Console.Clear();
             }
-            Thread.Sleep(500);
-            Console.Clear();
+            Thread.Sleep(300);
             playerInfo["score"] += playerInfo["movesLeft"] * 75;
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(@"
@@ -220,7 +219,6 @@ namespace Bashgeon
             Console.WriteLine("Нажмите любую клавишу для выхода...");
             Console.ReadKey();
         }
-
 
         static void DrawrMainMenu(string[] difficultyOptions, ref int currentOptionIndex)
         {
@@ -366,6 +364,7 @@ namespace Bashgeon
             Console.Write("]");
         }
 
+        // ДЕКОМПОЗИРОВАТЬ
         static void HandleDifficultyInput(Dictionary<string, int> playerInfo, Dictionary<string, int> mapAttributes, ref int currentOptionIndex, ref bool isDifficultyChosen)
         {
             // регистрируем нажатие на клавишу и далее имитируем сдвиг указателя на сложность
