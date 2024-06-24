@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Media;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Bashgeon
 {
@@ -9,6 +11,7 @@ namespace Bashgeon
     {
         static void Main(string[] args)
         {
+
             Console.SetWindowSize(120, 30);
             Console.Title = "Bashgeon";
             // Устанавливаем кодировку Unicode, чтобы все символы отображались, как нужно
@@ -53,10 +56,11 @@ namespace Bashgeon
             // ===================================================================================================================================
             while (!isDifficultyChosen)
             {
-                RenderMainMenu(difficultyOptions, ref currentOptionIndex);
+                DrawMainMenu(difficultyOptions, ref currentOptionIndex);
                 HandleDifficultyInput(playerInfo, mapAttributes, ref currentOptionIndex, ref isDifficultyChosen);
-                Console.Clear();
             }
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Clear();
             mainMenuAmbience.Stop();
 
 
@@ -79,55 +83,60 @@ namespace Bashgeon
                         if (y == 0 || y == map.GetLength(0) - 1 || x == 0 || x == map.GetLength(1) - 1) // стены по краям карты
                         {
                             map[y, x] = '#';
+                            continue;
                         }
-                        else
+
+                        else if ((x == 3 && y == 3) || (x == 20 && y == 13))
                         {
-                            switch (rand.Next(0, 15))
-                            {
-                                case 0:
-                                case 1:
-                                case 2:
-                                    if (isFirstCycle)
-                                        map[y, x] = '#';
-                                    break;
-                                case 3:
-                                case 4:
-                                case 5:
-                                case 6:
-                                case 7:
-                                case 8:
-                                case 9:
-                                case 10:
-                                case 11:
-                                case 12:
-                                    if (!isPlayerSpawned)
-                                    {
-                                        playerInfo["playerY"] = y;
-                                        playerInfo["playerX"] = x;
-                                        isPlayerSpawned = true;
-                                            
-                                    }
-                                    if (isFirstCycle) map[y, x] = ' ';
-                                    break;
-                                case 13:
-                                    if (!isFirstCycle && enemiesSpawned < mapAttributes["enemiesCount"] && map[y, x] == ' ')
-                                    {
-                                        enemiesSpawned++;
-                                        map[y, x] = '!';
-                                    }
-                                    else if(isFirstCycle)map[y, x] = ' ';
-                                    break;
-                                case 14:
-                                    if (!isFirstCycle && treasuresSpawned < mapAttributes["treasuresCount"] && map[y, x] == ' ')
-                                    {
-                                        treasuresSpawned++;
-                                        map[y, x] = 'X';
-                                    }
-                                    else if (isFirstCycle) map[y, x] = ' ';
-                                    break;
-                                default:
-                                    break;
-                            }
+                            map[y, x] = 'O';
+                            continue;
+                        }
+
+                        switch (rand.Next(0, 15))
+                        {
+                            case 0:
+                            case 1:
+                            case 2:
+                                if (isFirstCycle)
+                                    map[y, x] = '#';
+                                break;
+                            case 3:
+                            case 4:
+                            case 5:
+                            case 6:
+                            case 7:
+                            case 8:
+                            case 9:
+                            case 10:
+                            case 11:
+                            case 12:
+                                if (!isPlayerSpawned)
+                                {
+                                    playerInfo["playerY"] = y;
+                                    playerInfo["playerX"] = x;
+                                    isPlayerSpawned = true;
+
+                                }
+                                else if (isFirstCycle) map[y, x] = ' ';
+                                break;
+                            case 13:
+                                if (!isFirstCycle && enemiesSpawned < mapAttributes["enemiesCount"] && map[y, x] == ' ' && (y != playerInfo["playerY"] || x != playerInfo["playerX"]))
+                                {
+                                    enemiesSpawned++;
+                                    map[y, x] = '!';
+                                }
+                                else if (isFirstCycle) map[y, x] = ' ';
+                                break;
+                            case 14:
+                                if (!isFirstCycle && treasuresSpawned < mapAttributes["treasuresCount"] && map[y, x] == ' ' && (y != playerInfo["playerY"] || x != playerInfo["playerX"]))
+                                {
+                                    treasuresSpawned++;
+                                    map[y, x] = 'X';
+                                }
+                                else if (isFirstCycle) map[y, x] = ' ';
+                                break;
+                            default:
+                                break;
                         }
                     }
                 }
@@ -135,14 +144,13 @@ namespace Bashgeon
             }
 
             char currentCell;
-
             while (playerInfo["playerHealth"] > 0 && playerInfo["treasures"] != mapAttributes["treasuresCount"] && playerInfo["movesLeft"] > 0)
             {
 
-                RenderMap(map, playerInfo);
+                DrawMap(map, playerInfo);
                 DrawHealthBar(playerInfo["playerHealth"], playerInfo["playerMaxHealth"]);
                 DrawManaBar(playerInfo["playerMana"], playerInfo["playerMaxMana"]);
-                RenderUI(playerInfo, mapAttributes["treasuresCount"]);
+                DrawUI(playerInfo, mapAttributes["treasuresCount"]);
                 HandlePlayerInput(footstepSound, wallDestroySound, map, playerInfo);
 
 
@@ -164,16 +172,32 @@ namespace Bashgeon
                     playerInfo["movesLeft"] += 2;
                     enemyHitSound.Play();
                 }
+                else if (currentCell == 'O')
+                {
+                    if (playerInfo["playerX"] == 3)
+                    {
+                        playerInfo["playerX"] = 20;
+                        playerInfo["playerY"] = 13;
+                    }
+                    else
+                    {
+                        playerInfo["playerX"] = 3;
+                        playerInfo["playerY"] = 3;
+                    }
+                }
                 Console.Clear();
             }
+
+            playerInfo["score"] += playerInfo["movesLeft"] * 75;
+
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(@"
-			 ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ 
-			██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██╔═══██╗██║   ██║██╔════╝██╔══██╗
-			██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║   ██║█████╗  ██████╔╝
-			██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗
-			╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║
-			 ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝     ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝");
+			     ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ 
+			    ██╔════╝ ██╔══██╗████╗ ████║██╔════╝    ██╔═══██╗██║   ██║██╔════╝██╔══██╗
+			    ██║  ███╗███████║██╔████╔██║█████╗      ██║   ██║██║   ██║█████╗  ██████╔╝
+			    ██║   ██║██╔══██║██║╚██╔╝██║██╔══╝      ██║   ██║╚██╗ ██╔╝██╔══╝  ██╔══██╗
+			    ╚██████╔╝██║  ██║██║ ╚═╝ ██║███████╗    ╚██████╔╝ ╚████╔╝ ███████╗██║  ██║
+			     ╚═════╝ ╚═╝  ╚═╝╚═╝     ╚═╝╚══════╝     ╚═════╝   ╚═══╝  ╚══════╝╚═╝  ╚═╝");
             Console.SetCursorPosition(50, 11);
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"| Врагов убито: {playerInfo["kills"]} |");
@@ -182,17 +206,20 @@ namespace Bashgeon
             Console.WriteLine($"| Сокровищ собрано: {playerInfo["treasures"]} |");
             Console.SetCursorPosition(53, 15);
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"| Очки: {playerInfo["score"]} |");
+            Console.WriteLine($"| Очки: {playerInfo["score"] + playerInfo["movesLeft"]} |");
             Console.SetCursorPosition(42, 25);
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine("Нажмите любую клавишу для выхода...");
             Console.ReadKey();
+
         }
 
 
-        static void RenderMainMenu(string[] difficultyOptions, ref int currentOptionIndex)
+        static void DrawMainMenu(string[] difficultyOptions, ref int currentOptionIndex)
         {
             // Отрисовка главного меню с выбором сложности
+            Console.BackgroundColor = ConsoleColor.Black;
+            Console.Clear();
             Console.WriteLine(@"
 ░▒▓███████▓▒░   ░▒▓██████▓▒░   ░▒▓███████▓▒░ ░▒▓█▓▒░░▒▓█▓▒░  ░▒▓██████▓▒░  ░▒▓████████▓▒░  ░▒▓██████▓▒░  ░▒▓███████▓▒░  
 ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░        ░▒▓█▓▒░░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░ 
@@ -210,19 +237,87 @@ namespace Bashgeon
             Console.WriteLine("Нажмите Enter для подтверждения.");
             for (int i = 0; i < difficultyOptions.Length; i++)
             {
-
                 Console.SetCursorPosition(55, 12 + i);
-                if (currentOptionIndex == 0 && i == 0) Console.BackgroundColor = ConsoleColor.Green;
-                else if (currentOptionIndex == 1 && i == 1) Console.BackgroundColor = ConsoleColor.DarkYellow;
-                else if (currentOptionIndex == 2 && i == 2) Console.BackgroundColor = ConsoleColor.Red;
-                if (i == currentOptionIndex) Console.Write(difficultyOptions[i] + " <");
-                else Console.Write(difficultyOptions[i]);
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.WriteLine();
+                if (currentOptionIndex == 0) Console.BackgroundColor = ConsoleColor.Green;
+                else if (currentOptionIndex == 1) Console.BackgroundColor = ConsoleColor.DarkYellow;
+                else if (currentOptionIndex == 2) Console.BackgroundColor = ConsoleColor.Red;
+                if (i == currentOptionIndex) Console.WriteLine(difficultyOptions[i] + " <");
+                else
+                {
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.WriteLine(difficultyOptions[i]);
+                }
+            }
+
+        }
+        static void HandleDifficultyInput(Dictionary<string, int> playerInfo, Dictionary<string, int> mapAttributes, ref int currentOptionIndex, ref bool isDifficultyChosen)
+        {
+            // регистрируем нажатие на клавишу и далее имитируем сдвиг указателя на сложность
+            ConsoleKey difficultyChangeKey = Console.ReadKey(true).Key;
+            switch (difficultyChangeKey)
+            {
+
+                case ConsoleKey.DownArrow:
+                    if (currentOptionIndex < 2)
+                    {
+                        Console.Beep(900, 50);
+                        currentOptionIndex++;
+                    }
+                    break;
+                case ConsoleKey.UpArrow:
+                    if (currentOptionIndex > 0)
+                    {
+                        Console.Beep(900, 50);
+                        currentOptionIndex--;
+                    }
+                    break;
+                // При нажатии Enter, определяется выбранная сложность и задаются соответсвенно начальные параметры для игры
+                case ConsoleKey.Enter:
+                    if (currentOptionIndex == 0)
+                    {
+                        playerInfo["playerMaxHealth"] = 150;
+                        playerInfo["playerMaxMana"] = 100;
+                        playerInfo["playerHealth"] = 150;
+                        playerInfo["playerMana"] = 100;
+                        playerInfo["movesLeft"] = 20;
+                        playerInfo["killPoints"] = 45;
+                        playerInfo["treasurePickUpPoints"] = 150;
+                        mapAttributes["enemiesCount"] = 15;
+                        mapAttributes["treasuresCount"] = 20;
+
+                    }
+                    else if (currentOptionIndex == 1)
+                    {
+                        playerInfo["playerMaxHealth"] = 100;
+                        playerInfo["playerMaxMana"] = 60;
+                        playerInfo["playerHealth"] = 100;
+                        playerInfo["playerMana"] = 60;
+                        playerInfo["movesLeft"] = 15;
+                        playerInfo["killPoints"] = 80;
+                        playerInfo["treasurePickUpPoints"] = 200;
+                        mapAttributes["enemiesCount"] = 20;
+                        mapAttributes["treasuresCount"] = 15;
+                    }
+                    else
+                    {
+                        playerInfo["playerMaxHealth"] = 70;
+                        playerInfo["playerMaxMana"] = 40;
+                        playerInfo["playerHealth"] = 70;
+                        playerInfo["playerMana"] = 40;
+                        playerInfo["movesLeft"] = 10;
+                        playerInfo["killPoints"] = 135;
+                        playerInfo["treasurePickUpPoints"] = 300;
+                        mapAttributes["enemiesCount"] = 25;
+                        mapAttributes["treasuresCount"] = 10;
+                    }
+                    isDifficultyChosen = true;
+                    break;
+                default:
+                    break;
             }
         }
 
-        static void RenderMap(char[,] map, Dictionary<string, int> playerInfo)
+        static void DrawMap(char[,] map, Dictionary<string, int> playerInfo)
         {
             // Отрисовка игрового поля
             for (int y = 0; y < map.GetLength(0); y++)
@@ -246,6 +341,11 @@ namespace Bashgeon
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write(map[y, x] + " ");
                     }
+                    else if (map[y, x] == 'O')
+                    {
+                        Console.ForegroundColor = ConsoleColor.Magenta;
+                        Console.Write(map[y, x] + " ");
+                    }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -256,7 +356,7 @@ namespace Bashgeon
             }
         }
 
-        static void RenderUI(Dictionary<string, int> playerInfo, int treasuresCount)
+        static void DrawUI(Dictionary<string, int> playerInfo, int treasuresCount)
         {
             Console.SetCursorPosition(0, 15);
             Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -322,73 +422,6 @@ namespace Bashgeon
             }
             Console.BackgroundColor = ConsoleColor.Black;
             Console.Write("]");
-        }
-
-        static void HandleDifficultyInput(Dictionary<string, int> playerInfo, Dictionary<string, int> mapAttributes, ref int currentOptionIndex, ref bool isDifficultyChosen)
-        {
-            // регистрируем нажатие на клавишу и далее имитируем сдвиг указателя на сложность
-            ConsoleKey difficultyChangeKey = Console.ReadKey().Key;
-            switch (difficultyChangeKey)
-            {
-
-                case ConsoleKey.DownArrow:
-                    if (currentOptionIndex < 2)
-                    {
-                        Console.Beep(900, 50);
-                        currentOptionIndex++;
-                    }
-                    break;
-                case ConsoleKey.UpArrow:
-                    if (currentOptionIndex > 0)
-                    {
-                        Console.Beep(900, 50);
-                        currentOptionIndex--;
-                    }
-                    break;
-                // При нажатии Enter, определяется выбранная сложность и задаются соответсвенно начальные параметры для игры
-                case ConsoleKey.Enter:
-                    if (currentOptionIndex == 0)
-                    {
-                        playerInfo["playerMaxHealth"] = 150;
-                        playerInfo["playerMaxMana"] = 100;
-                        playerInfo["playerHealth"] = 150;
-                        playerInfo["playerMana"] = 100;
-                        playerInfo["movesLeft"] = 20;
-                        playerInfo["killPoints"] = 45;
-                        playerInfo["treasurePickUpPoints"] = 125;
-                        mapAttributes["enemiesCount"] = 15;
-                        mapAttributes["treasuresCount"] = 20;
-
-                    }
-                    else if (currentOptionIndex == 1)
-                    {
-                        playerInfo["playerMaxHealth"] = 100;
-                        playerInfo["playerMaxMana"] = 60;
-                        playerInfo["playerHealth"] = 100;
-                        playerInfo["playerMana"] = 60;
-                        playerInfo["movesLeft"] = 15;
-                        playerInfo["killPoints"] = 60;
-                        playerInfo["treasurePickUpPoints"] = 150;
-                        mapAttributes["enemiesCount"] = 20;
-                        mapAttributes["treasuresCount"] = 15;
-                    }
-                    else
-                    {
-                        playerInfo["playerMaxHealth"] = 70;
-                        playerInfo["playerMaxMana"] = 40;
-                        playerInfo["playerHealth"] = 70;
-                        playerInfo["playerMana"] = 40;
-                        playerInfo["movesLeft"] = 10;
-                        playerInfo["killPoints"] = 80;
-                        playerInfo["treasurePickUpPoints"] = 180;
-                        mapAttributes["enemiesCount"] = 25;
-                        mapAttributes["treasuresCount"] = 10;
-                    }
-                    isDifficultyChosen = true;
-                    break;
-                default:
-                    break;
-            }
         }
 
         static void HandlePlayerInput(SoundPlayer footstepSound, SoundPlayer explosionSound, char[,] map, Dictionary<string, int> playerInfo)

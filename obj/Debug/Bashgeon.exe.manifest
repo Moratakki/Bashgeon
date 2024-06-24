@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Bashgeon.exe" size="15296">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="Bashgeon.exe" size="15808">
       <assemblyIdentity name="Bashgeon" version="1.0.0.0" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>XoMOe3w2Tx3+ETmfMJeaXYWgenTXbBStyN+wCQ39wys=</dsig:DigestValue>
+        <dsig:DigestValue>wpgF0EhwG3nBYpkGbRfvfxSBVs33gzoJVxFgM4P7QxE=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
