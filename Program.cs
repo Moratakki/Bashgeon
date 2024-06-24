@@ -22,6 +22,8 @@ namespace Bashgeon
             SoundPlayer pickUpTreasure = new SoundPlayer($@"{Environment.CurrentDirectory}\pick_up.wav");
             SoundPlayer footstepSound = new SoundPlayer($@"{Environment.CurrentDirectory}\footstep.wav");
             SoundPlayer enemyHitSound = new SoundPlayer($@"{Environment.CurrentDirectory}\enemy_hit.wav");
+            SoundPlayer portalWarp = new SoundPlayer($@"{Environment.CurrentDirectory}\portal.wav");
+            SoundPlayer selfHurt = new SoundPlayer($@"{Environment.CurrentDirectory}\self_hurt.wav");
             // Инициализируем данные, нужные для выбора сложности
             string[] difficultyOptions = { "Easy", "Medium", "Hard" };
             int currentOptionIndex = 0;
@@ -159,7 +161,7 @@ namespace Bashgeon
                 DrawHealthBar(playerInfo["playerHealth"], playerInfo["playerMaxHealth"]);
                 DrawManaBar(playerInfo["playerMana"], playerInfo["playerMaxMana"]);
                 DrawrUI(playerInfo, mapAttributes["treasuresCount"]);
-                HandlePlayerInput(footstepSound, wallDestroySound, map, playerInfo);
+                HandlePlayerInput(footstepSound, selfHurt, wallDestroySound, map, playerInfo);
 
 
                 currentCell = map[playerInfo["playerY"], playerInfo["playerX"]];
@@ -182,6 +184,7 @@ namespace Bashgeon
                 }
                 else if (currentCell == 'O')
                 {
+                    portalWarp.Play();
                     if (playerInfo["playerX"] == 3)
                     {
                         playerInfo["playerX"] = map.GetLength(1) - 4;
@@ -438,7 +441,7 @@ namespace Bashgeon
             }
         }
 
-        static void HandlePlayerInput(SoundPlayer footstepSound, SoundPlayer explosionSound, char[,] map, Dictionary<string, int> playerInfo)
+        static void HandlePlayerInput(SoundPlayer footstepSound, SoundPlayer selfHurt, SoundPlayer explosionSound, char[,] map, Dictionary<string, int> playerInfo)
         {
             /*
              Регистрируем нажитие на клавишу.
@@ -463,6 +466,7 @@ namespace Bashgeon
             }
             else if (pressedKey.Key == ConsoleKey.F && playerInfo["playerHealth"] > 20)
             {
+                selfHurt.Play();
                 playerInfo["playerHealth"] -= 20;
                 playerInfo["movesLeft"] += 5;
             }
