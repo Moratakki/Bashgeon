@@ -223,7 +223,7 @@ namespace Bashgeon
             Console.ReadKey();
         }
 
-        static void DrawrMainMenu(string[] difficultyOptions, ref int currentOptionIndex)
+        static void DrawrMainMenu(string[] difficultyOptions, ref int currentOptionIndex)   
         {
             // Отрисовка главного меню с выбором сложности
             Console.Clear();
@@ -299,11 +299,7 @@ namespace Bashgeon
 
         static void DrawrUI(Dictionary<string, int> playerInfo, int treasuresCount)
         {
-            Console.SetCursorPosition(0, 15);
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.Write("\nНаши спонсоры: ");
-            Console.ForegroundColor = ConsoleColor.Blue;
-            Console.WriteLine("https://pornhub.com/");
+            Console.SetCursorPosition(0, 5);
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine($"Осталось шагов: {playerInfo["movesLeft"]}");
             if (playerInfo["treasures"] == treasuresCount)
@@ -314,17 +310,17 @@ namespace Bashgeon
             {
                 Console.WriteLine($"Сокровищ найдено: {playerInfo["treasures"]}");
             }
+            Console.WriteLine($"Врагов побеждено: {playerInfo["kills"]}");
             Console.WriteLine($"Очки: {playerInfo["score"]}");
-            Console.WriteLine($"\nВрагов побеждено: {playerInfo["kills"]}");
             Console.SetCursorPosition(47, 25);
             Console.WriteLine($"Ваши координаты: X: {playerInfo["playerX"]}; Y: {playerInfo["playerY"]}");
             Console.SetCursorPosition(100, 0);
             Console.WriteLine("Управление:");
-            Console.SetCursorPosition(95, 2);
+            Console.SetCursorPosition(97, 2);
             Console.WriteLine("Передвижение: ← ↓ → ↑");
-            Console.SetCursorPosition(95, 4);
+            Console.SetCursorPosition(97, 4);
             Console.WriteLine("Уничтожить стены: E");
-            Console.SetCursorPosition(95, 6);
+            Console.SetCursorPosition(97, 6);
             Console.WriteLine("Адреналин: F");
         }
 
@@ -393,52 +389,37 @@ namespace Bashgeon
                 case ConsoleKey.Enter:
                     if (currentOptionIndex == 0)
                     {
-                        playerInfo["playerMaxHealth"] = 150;
-                        playerInfo["playerMaxMana"] = 100;
-                        playerInfo["playerHealth"] = 150;
-                        playerInfo["playerMana"] = 100;
-                        playerInfo["movesLeft"] = 10;
-                        playerInfo["killPoints"] = 45;
-                        playerInfo["treasurePickUpPoints"] = 125;
-                        mapAttributes["xSize"] = 20;
-                        mapAttributes["ySize"] = 12;
-                        mapAttributes["enemiesCount"] = 15;
-                        mapAttributes["treasuresCount"] = 15;
-
+                        InitializeGameInfo(playerInfo, 150, 100, 10, 45, 125, mapAttributes, 20, 12, 15, 15);
                     }
                     else if (currentOptionIndex == 1)
                     {
-                        playerInfo["playerMaxHealth"] = 100;
-                        playerInfo["playerMaxMana"] = 60;
-                        playerInfo["playerHealth"] = 100;
-                        playerInfo["playerMana"] = 60;
-                        playerInfo["movesLeft"] = 12;
-                        playerInfo["killPoints"] = 80;
-                        playerInfo["treasurePickUpPoints"] = 200;
-                        mapAttributes["xSize"] = 24;
-                        mapAttributes["ySize"] = 16;
-                        mapAttributes["enemiesCount"] = 20;
-                        mapAttributes["treasuresCount"] = 15;
+                        InitializeGameInfo(playerInfo, 100, 60, 12, 80, 200, mapAttributes, 24, 16, 20, 15);
                     }
                     else
                     {
-                        playerInfo["playerMaxHealth"] = 70;
-                        playerInfo["playerMaxMana"] = 40;
-                        playerInfo["playerHealth"] = 70;
-                        playerInfo["playerMana"] = 40;
-                        playerInfo["movesLeft"] = 15;
-                        playerInfo["killPoints"] = 125;
-                        playerInfo["treasurePickUpPoints"] = 300;
-                        mapAttributes["xSize"] = 28;
-                        mapAttributes["ySize"] = 20;
-                        mapAttributes["enemiesCount"] = 35;
-                        mapAttributes["treasuresCount"] = 12;
+                        InitializeGameInfo(playerInfo, 70, 40, 15, 125, 300, mapAttributes, 28, 20, 35, 12);
                     }
                     isDifficultyChosen = true;
                     break;
                 default:
                     break;
             }
+        }
+
+        static void InitializeGameInfo(Dictionary<string, int> player, int HP, int MP, int moves, int killPts, int treasurePickUpPts,
+            Dictionary<string, int> mapAttr, int x, int y, int enemies, int treasures)
+        {
+            player["playerHealth"] = HP;
+            player["playerMana"] = MP;
+            player["playerMaxHealth"] = HP;
+            player["playerMaxMana"] = MP;
+            player["movesLeft"] = moves;
+            player["killPoints"] = killPts;
+            player["treasurePickUpPoints"] = treasurePickUpPts;
+            mapAttr["xSize"] = x;
+            mapAttr["ySize"] = y;
+            mapAttr["enemiesCount"] = enemies;
+            mapAttr["treasuresCount"] = treasures;
         }
 
         static void HandlePlayerInput(SoundPlayer footstepSound, SoundPlayer selfHurt, SoundPlayer explosionSound, char[,] map, Dictionary<string, int> playerInfo)

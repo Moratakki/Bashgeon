@@ -44,3 +44,14 @@ C:\Users\morat\source\repos\Bashgeon_v0.4d_win\bin\Debug\Bashgeon.exe.manifest
 C:\Users\morat\source\repos\Bashgeon_v0.4d_win\bin\Debug\Bashgeon.application
 C:\Users\morat\source\repos\Bashgeon_v0.4d_win\obj\Debug\Bashgeon.exe.manifest
 C:\Users\morat\source\repos\Bashgeon_v0.4d_win\obj\Debug\Bashgeon.application
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\bin\Debug\Bashgeon.exe.config
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\bin\Debug\Bashgeon.exe.manifest
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\bin\Debug\Bashgeon.application
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\bin\Debug\Bashgeon.exe
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\bin\Debug\Bashgeon.pdb
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Debug\Bashgeon.csproj.AssemblyReference.cache
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Debug\Bashgeon.csproj.CoreCompileInputs.cache
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Debug\Bashgeon.exe.manifest
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Debug\Bashgeon.application
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Debug\Bashgeon.exe
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Debug\Bashgeon.pdb
