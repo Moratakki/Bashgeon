@@ -1,0 +1,4 @@
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Release\Bashgeon.csproj.AssemblyReference.cache
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Release\Bashgeon.csproj.CoreCompileInputs.cache
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Release\Bashgeon.exe
+C:\Users\morat\source\repos\Bashgeon_v0.5_win\obj\Release\Bashgeon.pdb

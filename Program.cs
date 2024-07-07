@@ -17,13 +17,13 @@ namespace Bashgeon
             Console.OutputEncoding = Encoding.Unicode;
             Console.CursorVisible = false; // Убираем мигающий курсор, так как он не нужен в игре
                                            // Подгружаем все использующиеся в игре звуковые эффекты
-            SoundPlayer mainMenuAmbience = new SoundPlayer($@"{Environment.CurrentDirectory}\main_menu_bg_sound.wav");
-            SoundPlayer wallDestroySound = new SoundPlayer($@"{Environment.CurrentDirectory}\destroy_wall.wav");
-            SoundPlayer pickUpTreasure = new SoundPlayer($@"{Environment.CurrentDirectory}\pick_up.wav");
-            SoundPlayer footstepSound = new SoundPlayer($@"{Environment.CurrentDirectory}\footstep.wav");
-            SoundPlayer enemyHitSound = new SoundPlayer($@"{Environment.CurrentDirectory}\enemy_hit.wav");
-            SoundPlayer portalWarp = new SoundPlayer($@"{Environment.CurrentDirectory}\portal.wav");
-            SoundPlayer selfHurt = new SoundPlayer($@"{Environment.CurrentDirectory}\self_hurt.wav");
+            SoundPlayer mainMenuAmbience = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\main_menu_bg_sound.wav");
+            SoundPlayer wallDestroySound = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\destroy_wall.wav");
+            SoundPlayer pickUpTreasure = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\pick_up.wav");
+            SoundPlayer footstepSound = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\footstep.wav");
+            SoundPlayer enemyHitSound = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\enemy_hit.wav");
+            SoundPlayer portalWarp = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\portal.wav");
+            SoundPlayer selfHurt = new SoundPlayer($@"{Environment.CurrentDirectory}\assets\self_hurt.wav");
             // Инициализируем данные, нужные для выбора сложности
             string[] difficultyOptions = { "Easy", "Medium", "Hard" };
             int currentOptionIndex = 0;
@@ -68,7 +68,7 @@ namespace Bashgeon
             // ===================================================================================================================================
             //Инициализируем данные для генерации карты
             char[,] map = new char[mapAttributes["ySize"], mapAttributes["xSize"]];
-            Random rand = new Random();
+            Random entity = new Random();
             bool isPlayerSpawned = false;
             bool isFirstCycle = true;
             int treasuresSpawned = 0, enemiesSpawned = 0;
@@ -90,7 +90,7 @@ namespace Bashgeon
                             continue;
                         }
 
-                        switch (rand.Next(0, 25))
+                        switch (entity.Next(0, 25))
                         {
                             case 0:
                             case 1:
@@ -199,7 +199,7 @@ namespace Bashgeon
                 Console.Clear();
             }
             Thread.Sleep(300);
-            playerInfo["score"] += playerInfo["movesLeft"] * 75;
+            playerInfo["score"] += playerInfo["movesLeft"] * 35;
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(@"
 			 ██████╗  █████╗ ███╗   ███╗███████╗     ██████╗ ██╗   ██╗███████╗██████╗ 
@@ -223,7 +223,7 @@ namespace Bashgeon
             Console.ReadKey();
         }
 
-        static void DrawrMainMenu(string[] difficultyOptions, ref int currentOptionIndex)   
+        static void DrawrMainMenu(string[] difficultyOptions, ref int currentOptionIndex)
         {
             // Отрисовка главного меню с выбором сложности
             Console.Clear();
@@ -270,7 +270,7 @@ namespace Bashgeon
                     if (y == playerInfo["playerY"] && x == playerInfo["playerX"])
                     {
                         Console.ForegroundColor = ConsoleColor.DarkBlue;
-                        Console.Write("* ");
+                        Console.Write("ጿ ");
                     }
                     else if (map[y, x] == 'O')
                     {
@@ -492,5 +492,59 @@ namespace Bashgeon
 
             return direction;
         }
+    }
+
+    class Enemy
+    {
+        public int HP;
+        public int Damage;
+
+        public Enemy(int hp, int damage)
+        {
+            HP = hp;
+            Damage = damage;
+        }
+
+        public int Collision(int playerDamage)
+        {
+            HP -= playerDamage;
+            return Damage;
+        }
+
+    }
+
+    class EasyEnemy : Enemy
+    {
+        public ConsoleColor Color = ConsoleColor.Green;
+        public char Appearance = '⋌';
+
+        public EasyEnemy(int hp, int damage) : base(hp, damage) { }
+
+    }
+
+    class MidEnemy : Enemy
+    {
+        public float Scaling = 1.3f;
+        public ConsoleColor Сolor = ConsoleColor.Yellow;
+        public char Appearance = '‼';
+
+        public MidEnemy(int hp, int damage) : base(hp, damage)
+        {
+            HP = Convert.ToInt32(hp * Scaling);
+        }
+
+    }
+
+    class HardEnemy : Enemy
+    {
+        public float Scaling = 1.6f;
+        public ConsoleColor Color = ConsoleColor.DarkRed;
+        public char Appearance = '†';
+
+        public HardEnemy(int hp, int damage) : base(hp, damage)
+        {
+            HP = Convert.ToInt32(hp * Scaling);
+        }
+
     }
 }
